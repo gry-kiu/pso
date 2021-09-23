@@ -111,13 +111,6 @@ int main(int argc, char **argv) {
     printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
   }
 
-  // set some general PSO settings
-  settings->goal = 1e-5;
-  settings->size = 30;
-  settings->nhood_strategy = PSO_NHOOD_RING;
-  settings->nhood_size = 10;
-  settings->w_strategy = PSO_W_LIN_DEC;
-
   // initialize GBEST solution
   pso_result_t solution;
   // allocate memory for the best position buffer

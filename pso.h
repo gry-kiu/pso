@@ -71,7 +71,7 @@ typedef struct {
   int w_strategy; // inertia weight strategy (see PSO_W_*)
 } pso_settings_t;
 
-pso_settings_t *pso_settings_new(int dim, double range_lo, double range_hi);
+pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi);
 void pso_settings_free(pso_settings_t *settings);
 
 // return the swarm size based on dimensionality

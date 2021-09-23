@@ -61,19 +61,35 @@ int main(int argc, char **argv) {
   pso_settings_t *settings = NULL;
   pso_obj_fun_t obj_fun = NULL;
 
+  int dim = 30;
+  double *range_lo = (double *)malloc(dim * sizeof(double));
+  double *range_hi = (double *)malloc(dim * sizeof(double));
+
   // parse command line argument (function name)
   if (argc == 2) {
     if (strcmp(argv[1], "rosenbrock") == 0) {
       obj_fun = pso_rosenbrock;
-      settings = pso_settings_new(30, -2.048, 2.048);
+      for (int i = 0; i < dim; i++) {
+        range_lo[i] = -2.048;
+        range_hi[i] = 2.048;
+      }
+      settings = pso_settings_new(dim, range_lo, range_hi);
       printf("Optimizing function: rosenbrock (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "griewank") == 0) {
       obj_fun = pso_griewank;
-      settings = pso_settings_new(30, -600, 600);
+      for (int i = 0; i < dim; i++) {
+        range_lo[i] = -600;
+        range_hi[i] = 600;
+      }
+      settings = pso_settings_new(dim, range_lo, range_hi);
       printf("Optimizing function: griewank (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "sphere") == 0) {
       obj_fun = pso_sphere;
-      settings = pso_settings_new(30, -100, 100);
+      for (int i = 0; i < dim; i++) {
+        range_lo[i] = -100;
+        range_hi[i] = 100;
+      }
+      settings = pso_settings_new(dim, range_lo, range_hi);
       printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else {
       printf("Unsupported objective function: %s", argv[1]);
@@ -87,7 +103,11 @@ int main(int argc, char **argv) {
   // handle the default case (no argument given)
   if (obj_fun == NULL || settings == NULL) {
     obj_fun = pso_sphere;
-    settings = pso_settings_new(30, -100, 100);
+    for (int i = 0; i < dim; i++) {
+      range_lo[i] = -100;
+      range_hi[i] = 100;
+    }
+    settings = pso_settings_new(dim, range_lo, range_hi);
     printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
   }
 
@@ -111,6 +131,9 @@ int main(int argc, char **argv) {
 
   // free the settings
   pso_settings_free(settings);
+
+  free(range_lo);
+  free(range_hi);
 
   return 0;
 }

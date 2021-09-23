@@ -92,7 +92,6 @@ void inform(int *comm, double **pos_nb, double **pos_b, double *fit_b, int impro
 // =============
 // ring topology
 // =============
-
 // topology initialization :: this is a static (i.e. fixed) topology
 void init_comm_ring(int *comm, pso_settings_t *settings) {
   int i;
@@ -156,7 +155,7 @@ void inform_random(int *comm, double **pos_nb, double **pos_b, double *fit_b, do
 
 //==============================================================
 // create pso settings
-pso_settings_t *pso_settings_new(int dim, double range_lo, double range_hi) {
+pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi) {
   pso_settings_t *settings = (pso_settings_t *)malloc(sizeof(pso_settings_t));
   if (settings == NULL) {
     return NULL;
@@ -181,8 +180,8 @@ pso_settings_t *pso_settings_new(int dim, double range_lo, double range_hi) {
   }
 
   for (int i = 0; i < settings->dim; i++) {
-    settings->range_lo[i] = range_lo;
-    settings->range_hi[i] = range_hi;
+    settings->range_lo[i] = range_lo[i];
+    settings->range_hi[i] = range_hi[i];
   }
 
   settings->size = pso_calc_swarm_size(settings->dim);
@@ -358,12 +357,9 @@ void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *soluti
         } else {
           // enforce periodic boundary conditions
           if (pos[i][d] < settings->range_lo[d]) {
-
             pos[i][d] = settings->range_hi[d] - fmod(settings->range_lo[d] - pos[i][d], settings->range_hi[d] - settings->range_lo[d]);
             vel[i][d] = 0;
-
           } else if (pos[i][d] > settings->range_hi[d]) {
-
             pos[i][d] = settings->range_lo[d] + fmod(pos[i][d] - settings->range_hi[d], settings->range_hi[d] - settings->range_lo[d]);
             vel[i][d] = 0;
           }

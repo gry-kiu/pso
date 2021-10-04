@@ -155,7 +155,7 @@ void inform_random(int *comm, double **pos_nb, double **pos_b, double *fit_b, do
 
 //==============================================================
 // create pso settings
-pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi) {
+pso_settings_t *pso_settings_new(int dim, double *range_lo_init, double *range_hi_init, double *range_lo_iter, double *range_hi_iter) {
   pso_settings_t *settings = (pso_settings_t *)malloc(sizeof(pso_settings_t));
   if (settings == NULL) {
     return NULL;
@@ -166,22 +166,41 @@ pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi) {
   settings->goal = 1e-5;
 
   // set up the range arrays
-  settings->range_lo = (double *)malloc(settings->dim * sizeof(double));
-  if (settings->range_lo == NULL) {
+  settings->range_lo_init = (double *)malloc(settings->dim * sizeof(double));
+  if (settings->range_lo_init == NULL) {
     free(settings);
     return NULL;
   }
 
-  settings->range_hi = (double *)malloc(settings->dim * sizeof(double));
-  if (settings->range_hi == NULL) {
+  settings->range_hi_init = (double *)malloc(settings->dim * sizeof(double));
+  if (settings->range_hi_init == NULL) {
     free(settings);
-    free(settings->range_lo);
+    free(settings->range_lo_init);
+    return NULL;
+  }
+
+  settings->range_lo_iter = (double *)malloc(settings->dim * sizeof(double));
+  if (settings->range_lo_iter == NULL) {
+    free(settings);
+    free(settings->range_lo_init);
+    free(settings->range_hi_init);
+    return NULL;
+  }
+
+  settings->range_hi_iter = (double *)malloc(settings->dim * sizeof(double));
+  if (settings->range_hi_iter == NULL) {
+    free(settings);
+    free(settings->range_lo_init);
+    free(settings->range_hi_init);
+    free(settings->range_lo_iter);
     return NULL;
   }
 
   for (int i = 0; i < settings->dim; i++) {
-    settings->range_lo[i] = range_lo[i];
-    settings->range_hi[i] = range_hi[i];
+    settings->range_lo_init[i] = range_lo_init[i];
+    settings->range_hi_init[i] = range_hi_init[i];
+    settings->range_lo_iter[i] = range_lo_iter[i];
+    settings->range_hi_iter[i] = range_hi_iter[i];
   }
 
   settings->size = pso_calc_swarm_size(settings->dim);
@@ -202,8 +221,10 @@ pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi) {
 
 // destroy PSO settings
 void pso_settings_free(pso_settings_t *settings) {
-  free(settings->range_lo);
-  free(settings->range_hi);
+  free(settings->range_lo_init);
+  free(settings->range_hi_init);
+  free(settings->range_lo_iter);
+  free(settings->range_hi_iter);
   free(settings);
 }
 
@@ -225,7 +246,7 @@ void pso_matrix_free(double **m, int size) {
 //==============================================================
 // PSO ALGORITHM
 //==============================================================
-void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *solution, pso_settings_t *settings) {
+void pso_solve(double (*obj_fun)(const double *const solution, const int D), pso_result_t *solution, pso_settings_t *settings) {
   // Particles
   double **pos = pso_matrix_new(settings->size, settings->dim); // position matrix
   double **vel = pso_matrix_new(settings->size, settings->dim); // velocity matrix
@@ -291,8 +312,8 @@ void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *soluti
     // for each dimension
     for (d = 0; d < settings->dim; d++) {
       // generate two numbers within the specified range
-      a = settings->range_lo[d] + (settings->range_hi[d] - settings->range_lo[d]) * RNG_UNIFORM();
-      b = settings->range_lo[d] + (settings->range_hi[d] - settings->range_lo[d]) * RNG_UNIFORM();
+      a = settings->range_lo_init[d] + (settings->range_hi_init[d] - settings->range_lo_init[d]) * RNG_UNIFORM();
+      b = settings->range_lo_init[d] + (settings->range_hi_init[d] - settings->range_lo_init[d]) * RNG_UNIFORM();
       // initialize position
       pos[i][d] = a;
       // best position is the same
@@ -301,7 +322,7 @@ void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *soluti
       vel[i][d] = (a - b) / 2.;
     }
     // update particle fitness
-    fit[i] = obj_fun(pos[i], settings->dim, obj_fun_params);
+    fit[i] = obj_fun(pos[i], settings->dim);
     fit_b[i] = fit[i]; // this is also the personal best
     // update gbest??
     if (fit[i] < solution->error) {
@@ -347,27 +368,27 @@ void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *soluti
         pos[i][d] += vel[i][d];
         // clamp position within bounds?
         if (settings->clamp_pos) {
-          if (pos[i][d] < settings->range_lo[d]) {
-            pos[i][d] = settings->range_lo[d];
+          if (pos[i][d] < settings->range_lo_iter[d]) {
+            pos[i][d] = settings->range_lo_iter[d];
             vel[i][d] = 0;
-          } else if (pos[i][d] > settings->range_hi[d]) {
-            pos[i][d] = settings->range_hi[d];
+          } else if (pos[i][d] > settings->range_hi_iter[d]) {
+            pos[i][d] = settings->range_hi_iter[d];
             vel[i][d] = 0;
           }
         } else {
           // enforce periodic boundary conditions
-          if (pos[i][d] < settings->range_lo[d]) {
-            pos[i][d] = settings->range_hi[d] - fmod(settings->range_lo[d] - pos[i][d], settings->range_hi[d] - settings->range_lo[d]);
+          if (pos[i][d] < settings->range_lo_iter[d]) {
+            pos[i][d] = settings->range_hi_iter[d] - fmod(settings->range_lo_iter[d] - pos[i][d], settings->range_hi_iter[d] - settings->range_lo_iter[d]);
             vel[i][d] = 0;
-          } else if (pos[i][d] > settings->range_hi[d]) {
-            pos[i][d] = settings->range_lo[d] + fmod(pos[i][d] - settings->range_hi[d], settings->range_hi[d] - settings->range_lo[d]);
+          } else if (pos[i][d] > settings->range_hi_iter[d]) {
+            pos[i][d] = settings->range_lo_iter[d] + fmod(pos[i][d] - settings->range_hi_iter[d], settings->range_hi_iter[d] - settings->range_lo_iter[d]);
             vel[i][d] = 0;
           }
         }
       }
 
       // update particle fitness
-      fit[i] = obj_fun(pos[i], settings->dim, obj_fun_params);
+      fit[i] = obj_fun(pos[i], settings->dim);
       // update personal best position?
       if (fit[i] < fit_b[i]) {
         fit_b[i] = fit[i];

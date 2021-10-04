@@ -28,7 +28,7 @@
 //  BENCHMARK FUNCTIONS
 //==============================================================
 
-double pso_sphere(double *vec, int dim, void *params) {
+double pso_sphere(const double *const vec, const int dim) {
   double sum = 0;
   int i;
   for (i = 0; i < dim; i++)
@@ -36,7 +36,7 @@ double pso_sphere(double *vec, int dim, void *params) {
   return sum;
 }
 
-double pso_rosenbrock(double *vec, int dim, void *params) {
+double pso_rosenbrock(const double *const vec, const int dim) {
   double sum = 0;
   int i;
   for (i = 0; i < dim - 1; i++)
@@ -44,7 +44,7 @@ double pso_rosenbrock(double *vec, int dim, void *params) {
   return sum;
 }
 
-double pso_griewank(double *vec, int dim, void *params) {
+double pso_griewank(const double *const vec, const int dim) {
   double sum = 0.;
   double prod = 1.;
   int i;
@@ -59,7 +59,7 @@ double pso_griewank(double *vec, int dim, void *params) {
 
 int main(int argc, char **argv) {
   pso_settings_t *settings = NULL;
-  pso_obj_fun_t obj_fun = NULL;
+  double (*obj_fun)(const double *const solution, const int D) = NULL;
 
   int dim = 30;
   double *range_lo = (double *)malloc(dim * sizeof(double));
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -2.048;
         range_hi[i] = 2.048;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
       printf("Optimizing function: rosenbrock (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "griewank") == 0) {
       obj_fun = pso_griewank;
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -600;
         range_hi[i] = 600;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
       printf("Optimizing function: griewank (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "sphere") == 0) {
       obj_fun = pso_sphere;
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -100;
         range_hi[i] = 100;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
       printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else {
       printf("Unsupported objective function: %s", argv[1]);
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
       range_lo[i] = -100;
       range_hi[i] = 100;
     }
-    settings = pso_settings_new(dim, range_lo, range_hi);
+    settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
     printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
   }
 
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
   solution.gbest = (double *)malloc(settings->dim * sizeof(double));
 
   // run optimization algorithm
-  pso_solve(obj_fun, NULL, &solution, settings);
+  pso_solve(obj_fun, &solution, settings);
 
   // free the gbest buffer
   free(solution.gbest);

@@ -51,8 +51,10 @@ typedef double (*pso_obj_fun_t)(double *, int, void *);
 // PSO SETTINGS
 typedef struct {
   int dim; // problem dimensionality
-  double *range_lo; // lower range limit (array of length DIM)
-  double *range_hi; // higher range limit (array of length DIM)
+  double *range_lo_init; // lower range limit (array of length DIM) // for initialization
+  double *range_hi_init; // higher range limit (array of length DIM) // for initialization
+  double *range_lo_iter; // lower range limit (array of length DIM) // for iteration
+  double *range_hi_iter; // higher range limit (array of length DIM) // for iteration
   double goal; // optimization goal (error threshold)
 
   int size; // swarm size (number of particles)
@@ -71,7 +73,7 @@ typedef struct {
   int w_strategy; // inertia weight strategy (see PSO_W_*)
 } pso_settings_t;
 
-pso_settings_t *pso_settings_new(int dim, double *range_lo, double *range_hi);
+pso_settings_t *pso_settings_new(int dim, double *range_lo_init, double *range_hi_init, double *range_lo_iter, double *range_hi_iter);
 void pso_settings_free(pso_settings_t *settings);
 
 // return the swarm size based on dimensionality
@@ -79,6 +81,6 @@ int pso_calc_swarm_size(int dim);
 
 // minimize the provided obj_fun using PSO with the specified settings
 // and store the result in *solution
-void pso_solve(pso_obj_fun_t obj_fun, void *obj_fun_params, pso_result_t *solution, pso_settings_t *settings);
+void pso_solve(double (*obj_fun)(const double *const solution, const int D), pso_result_t *solution, pso_settings_t *settings);
 
 #endif // PSO_H_

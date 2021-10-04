@@ -48,7 +48,7 @@ int pso_calc_swarm_size(int dim) {
 // INERTIA WEIGHT UPDATE STRATEGIES
 //==============================================================
 // calculate linearly decreasing inertia weight
-double calc_inertia_lin_dec(int step, pso_settings_t *settings) {
+static double calc_inertia_lin_dec(int step, pso_settings_t *settings) {
   int dec_stage = 3 * settings->steps / 4;
   if (step <= dec_stage)
     return settings->w_min + (settings->w_max - settings->w_min) * (dec_stage - step) / dec_stage;
@@ -60,7 +60,7 @@ double calc_inertia_lin_dec(int step, pso_settings_t *settings) {
 // NEIGHBORHOOD (COMM) MATRIX STRATEGIES
 //==============================================================
 // global neighborhood
-void inform_global(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
+static void inform_global(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
   int i;
   // all particles have the same attractor (gbest)
   // copy the contents of gbest to pos_nb
@@ -72,7 +72,7 @@ void inform_global(int *comm, double **pos_nb, double **pos_b, double *fit_b, do
 // general inform function :: according to the connectivity
 // matrix COMM, it copies the best position (from pos_b) of the
 // informers of each particle to the pos_nb matrix
-void inform(int *comm, double **pos_nb, double **pos_b, double *fit_b, int improved, pso_settings_t *settings) {
+static void inform(int *comm, double **pos_nb, double **pos_b, double *fit_b, int improved, pso_settings_t *settings) {
   int i, j;
   int b_n; // best neighbor in terms of fitness
   // for each particle
@@ -93,7 +93,7 @@ void inform(int *comm, double **pos_nb, double **pos_b, double *fit_b, int impro
 // ring topology
 // =============
 // topology initialization :: this is a static (i.e. fixed) topology
-void init_comm_ring(int *comm, pso_settings_t *settings) {
+static void init_comm_ring(int *comm, pso_settings_t *settings) {
   int i;
   // reset array
   memset((void *)comm, 0, sizeof(int) * settings->size * settings->size);
@@ -120,7 +120,7 @@ void init_comm_ring(int *comm, pso_settings_t *settings) {
   }
 }
 
-void inform_ring(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
+static void inform_ring(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
   // update pos_nb matrix
   inform(comm, pos_nb, pos_b, fit_b, improved, settings);
 }
@@ -128,7 +128,7 @@ void inform_ring(int *comm, double **pos_nb, double **pos_b, double *fit_b, doub
 // ============================
 // random neighborhood topology
 // ============================
-void init_comm_random(int *comm, pso_settings_t *settings) {
+static void init_comm_random(int *comm, pso_settings_t *settings) {
   int i, j, k;
   // reset array
   memset((void *)comm, 0, sizeof(int) * settings->size * settings->size);
@@ -146,7 +146,7 @@ void init_comm_random(int *comm, pso_settings_t *settings) {
   }
 }
 
-void inform_random(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
+static void inform_random(int *comm, double **pos_nb, double **pos_b, double *fit_b, double *gbest, int improved, pso_settings_t *settings) {
   // regenerate connectivity??
   if (!improved)
     init_comm_random(comm, settings);
@@ -228,7 +228,7 @@ void pso_settings_free(pso_settings_t *settings) {
   free(settings);
 }
 
-double **pso_matrix_new(int size, int dim) {
+static double **pso_matrix_new(int size, int dim) {
   double **m = (double **)malloc(size * sizeof(double *));
   for (int i = 0; i < size; i++) {
     m[i] = (double *)malloc(dim * sizeof(double));
@@ -236,7 +236,7 @@ double **pso_matrix_new(int size, int dim) {
   return m;
 }
 
-void pso_matrix_free(double **m, int size) {
+static void pso_matrix_free(double **m, int size) {
   for (int i = 0; i < size; i++) {
     free(m[i]);
   }

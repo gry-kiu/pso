@@ -1,18 +1,16 @@
-CC=g++
-CFLAGS=-Wall -g
-DEPS=pso.h
+CC = gcc
+CFLAGS = -Wall -Werror
+TARGET1 = pso
+TARGET2 = pso.so
+OBJECTS = pso.o
 
-SOURCE_FILES=$(shell find . -name '*.c')
-OBJ_FILES=$(SOURCE_FILES:.c=.o) 
-LIB=-lm 
+all : $(TARGET1) $(TARGET2)
 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-	
-demopso: $(OBJ_FILES)
-	$(CC) $^ -o $@ $(LIB)
+$(TARGET1) : $(TARGET2)
+	$(CC) $(CFLAGS) -o $@ demo.c $^ -lm -Wl,-rpath=$(shell pwd)
 
+$(TARGET2) : $(OBJECTS)
+	$(CC) $(CFLAGS) -fPIC -shared -o $@ $^
 
-.PHONY: clean
-clean:
-	rm -f demopso $(OBJ_FILES)
+clean :
+	rm -f *.o $(TARGET1) $(TARGET2)

@@ -155,7 +155,7 @@ static void inform_random(int *comm, double **pos_nb, double **pos_b, double *fi
 
 //==============================================================
 // create pso settings
-pso_settings_t *pso_settings_new(int dim, double *range_lo_init, double *range_hi_init, double *range_lo_iter, double *range_hi_iter) {
+pso_settings_t *pso_settings_new(int dim, double *range_lo_init, double *range_hi_init, double *range_lo_iter, double *range_hi_iter, int steps) {
   pso_settings_t *settings = (pso_settings_t *)malloc(sizeof(pso_settings_t));
   if (settings == NULL) {
     return NULL;
@@ -205,7 +205,7 @@ pso_settings_t *pso_settings_new(int dim, double *range_lo_init, double *range_h
 
   settings->size = pso_calc_swarm_size(settings->dim);
   settings->print_every = 1000;
-  settings->steps = 100000;
+  settings->steps = steps;
   settings->c1 = 1.496;
   settings->c2 = 1.496;
   settings->w_max = PSO_INERTIA;

@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -2.048;
         range_hi[i] = 2.048;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 1500);
       printf("Optimizing function: rosenbrock (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "griewank") == 0) {
       obj_fun = pso_griewank;
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -600;
         range_hi[i] = 600;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 1500);
       printf("Optimizing function: griewank (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else if (strcmp(argv[1], "sphere") == 0) {
       obj_fun = pso_sphere;
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
         range_lo[i] = -100;
         range_hi[i] = 100;
       }
-      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
+      settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 1500);
       printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
     } else {
       printf("Unsupported objective function: %s", argv[1]);
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
       range_lo[i] = -100;
       range_hi[i] = 100;
     }
-    settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi);
+    settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 1500);
     printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
   }
 

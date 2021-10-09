@@ -334,7 +334,8 @@ void pso_solve(double (*obj_fun)(const double *const solution, const int D), pso
   }
 
   // RUN ALGORITHM
-  for (step = 0; step < settings->steps; step++) {
+  step = settings->size;
+  while (step < settings->steps) {
     // update current step
     settings->step = step;
     // update inertia weight
@@ -407,6 +408,8 @@ void pso_solve(double (*obj_fun)(const double *const solution, const int D), pso
 
     if (settings->print_every && (step % settings->print_every == 0))
       printf("Step %d (w=%.2f) :: min err=%.5e\n", step, w, solution->error);
+
+    step += settings->size;
   }
 
   // free resources

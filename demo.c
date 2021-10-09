@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
       range_lo[i] = -100;
       range_hi[i] = 100;
     }
-    settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 1500);
+    settings = pso_settings_new(dim, range_lo, range_hi, range_lo, range_hi, 150000);
     printf("Optimizing function: sphere (dim=%d, swarm size=%d)\n", settings->dim, settings->size);
   }
 
